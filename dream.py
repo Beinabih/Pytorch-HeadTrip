@@ -57,11 +57,8 @@ class Dreamer:
         self.at_layer_para = config["at_layer"]
         self.lr = config["lr"]
         self.random = config["random"]
-        self.custom_ch = config["custom_channel"]
         self.no_class = config["no_class"]
-        self.list = config["from_list"]
         self.ch_list = config["channel_list"]
-        self.max_octaves = config["max_octaves"]
         self.img_list = sorted(glob.glob(img_p))
         self.depth = config["use_depth"]
         self.depth_w = config["depth_str"]
@@ -93,7 +90,7 @@ class Dreamer:
         """
         if self.config["model"] == "resnet":
             network = models.resnext50_32x4d(pretrained=True)
-        elif self.config["model"] == "vgg":
+        elif self.config["model"] == "vgg19":
             network = models.vgg19(pretrained=True)
             print(network)
         elif self.config["model"] == "densenet":

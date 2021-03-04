@@ -1,0 +1,47 @@
+######### Hyperparameters
+num_iterations: 11
+num_octaves: 20
+octave_scale: 1.2
+lr: 0.008
+#########
+# Random Hyperparameter
+random: False
+# Guided Dreaming on/off
+guided: False
+#########
+# takes the max class
+max_output: True
+# takes the max class on each octave
+pyramid_max: False
+#########
+# takes all the classes from the list
+channel_list: [882]
+#########
+# if you want to dream on other layers
+no_class: False
+at_layer: 0
+###########
+use_depth: True
+depth_str: 1
+# use Threshold on mask to set specific areas to 0
+use_threshold: False
+th_val: 0
+invert_depth: False #foreground/background
+#########
+pretrained: True
+########
+# input and output path
+input: ""
+outpath: ""
+# sequence startposition when sorted
+start_position: 122
+######
+#c hange model here, available are 
+# resnet, vgg, alexnet, inception, densenet, mobile, resnetx, squeeze, masnet, googlenet
+model: vgg19
+
+# set true for video sequence
+seq: True
+
+# float precision 16
+fp16: False
