@@ -19,3 +19,11 @@ pip install -r requirements.txt
 ```
 
 If you want to use fp16, you need to install apex manually
+
+# Usage
+
+For inference you need a config file like the basic_conf in the configs folder. 
+
+```
+python dream.py --config configs/basic_conf.yaml
+```
