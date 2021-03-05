@@ -1,8 +1,10 @@
 # Pytorch Headtrip
 
+-   Work in Progress
+
 ![](examples/dream_example.gif)
 
--   Work in Progress
+[![](https://img.youtube.com/vi/Cd5LNeT5wHI/0.jpg)](https://youtu.be/Cd5LNeT5wHI)
 
 Single Deep Dreaming and Sequence Dreaming with Optical Flow and Depth Estimation in Pytorch.
 
@@ -38,3 +40,5 @@ python dream.py --config configs/basic_conf.yaml
 
 Currently, its only possible to dream on a sequence of frames from a video that are
 extracted beforehand with e.g. _ffmpeg_
+
+-   The SpyNet Code is adapted from this [github repository](https://github.com/sniklaus/pytorch-spynet)
