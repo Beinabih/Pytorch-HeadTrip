@@ -8,10 +8,10 @@ Single Deep Dreaming and Sequence Dreaming with Optical Flow and Depth Estimatio
 
 
 Features:
-- Sequence Dreaming with Optical Flow
-- Depth Estimation with MiDas
+- Sequence Dreaming with Optical Flow (Farneback or SpyNet)
+- Depth Estimation with [MiDas](https://pytorch.org/hub/intelisl_midas_v2/)
 - Supports multiple Pytorch Architectures
-- Dream Single Class of ImageNet
+- Dream Single Class of ImageNet, check my post [here](https://towardsdatascience.com/deep-lucid-dreaming-94fecd3cd46d)
 
 
 # Install
