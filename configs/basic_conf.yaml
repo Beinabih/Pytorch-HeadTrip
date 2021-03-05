@@ -20,6 +20,9 @@ channel_list: [882]
 # if you want to dream on other layers
 no_class: False
 at_layer: 0
+##########
+# optical flow spynet or opencv farneback
+use_spynet: False
 ###########
 use_depth: True
 depth_str: 1
@@ -31,10 +34,10 @@ invert_depth: False #foreground/background
 pretrained: True
 ########
 # input and output path
-input: ""
-outpath: ""
+input: "examples/example_img"
+outpath: "examples/output"
 # sequence startposition when sorted
-start_position: 122
+start_position: 0
 ######
 #c hange model here, available are 
 # resnet, vgg, alexnet, inception, densenet, mobile, resnetx, squeeze, masnet, googlenet

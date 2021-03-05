@@ -317,9 +317,16 @@ class Dreamer:
         img2 = np.float32(img2)
 
         h, w, c = img1.shape
-        flow = calc_opflow(np.uint8(img1), np.uint8(img2))
+        if config['use_spynet']:
+            flow = calc_opflow(np.uint8(img1), np.uint8(img2))
+            flow = np.transpose(np.float32(flow), (1, 2, 0))
+        else:
+            grayImg1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
+            grayImg2 = cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY)
 
-        flow = np.transpose(np.float32(flow), (1, 2, 0))
+            flow = cv2.calcOpticalFlowFarneback(grayImg1, grayImg2, pyr_scale=0.5, levels=3, winsize=15, iterations=3, poly_n=3, poly_sigma=1.2, flags=0, flow=1)
+
+
         inv_flow = flow
         flow = -flow
 
