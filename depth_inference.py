@@ -1,28 +1,31 @@
-import torch
 import os
-import cv2
-import torch
 import urllib.request
 
+import cv2
 import matplotlib.pyplot as plt
+import torch
 
-class MiDaS():
 
+class MiDaS:
     def __init__(self, use_large_model):
 
         os.makedirs("depth_model", exist_ok=True)
-        torch.hub.set_dir('depth_model')
+        torch.hub.set_dir("depth_model")
 
         if use_large_model:
-            self.midas = torch.hub.load("intel-isl/MiDaS", "MiDaS",_use_new_zipfile_serialization=False)
+            self.midas = torch.hub.load(
+                "intel-isl/MiDaS", "MiDaS", _use_new_zipfile_serialization=False
+            )
         else:
-            self.midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small",_use_new_zipfile_serialization=False)
+            self.midas = torch.hub.load(
+                "intel-isl/MiDaS", "MiDaS_small", _use_new_zipfile_serialization=False
+            )
 
-
-        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        self.device = (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
         self.midas.to(self.device)
         self.midas.eval()
-
 
         midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
 
@@ -30,7 +33,6 @@ class MiDaS():
             self.transform = midas_transforms.default_transform
         else:
             self.transform = midas_transforms.small_transform
-
 
     def inference(self, img):
 
@@ -47,5 +49,5 @@ class MiDaS():
                 mode="bicubic",
                 align_corners=False,
             ).squeeze()
-            
+
         return prediction.detach().cpu().numpy()

@@ -1,25 +1,29 @@
-import numpy as np
-import torch
-from torchvision import transforms
-from torch.autograd import Variable
-import scipy.ndimage as nd
-import torch.nn.functional as F
-import torch.nn as nn
+import math
+import numbers
+
 import cv2
 import matplotlib.pyplot as plt
-import numbers
-import math
+import numpy as np
+import scipy.ndimage as nd
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.autograd import Variable
+from torchvision import transforms
 
 mean = np.array([0.485, 0.456, 0.406])
 std = np.array([0.229, 0.224, 0.225])
 
-preprocess = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+preprocess = transforms.Compose(
+    [transforms.ToTensor(), transforms.Normalize(mean, std)]
+)
 
 
 def show_img(img):
     img = convert(img.detach().cpu().numpy())
     plt.imshow(img)
     plt.show()
+
 
 def warp(x, flo):
     """
@@ -28,47 +32,48 @@ def warp(x, flo):
     flo: [B, 2, H, W] flow
     """
     B, C, H, W = x.size()
-    # mesh grid 
-    xx = torch.arange(0, W).view(1,-1).repeat(H,1)
-    yy = torch.arange(0, H).view(-1,1).repeat(1,W)
-    xx = xx.view(1,1,H,W).repeat(B,1,1,1)
-    yy = yy.view(1,1,H,W).repeat(B,1,1,1)
-    grid = torch.cat((xx,yy),1).float()
+    # mesh grid
+    xx = torch.arange(0, W).view(1, -1).repeat(H, 1)
+    yy = torch.arange(0, H).view(-1, 1).repeat(1, W)
+    xx = xx.view(1, 1, H, W).repeat(B, 1, 1, 1)
+    yy = yy.view(1, 1, H, W).repeat(B, 1, 1, 1)
+    grid = torch.cat((xx, yy), 1).float()
 
     if x.is_cuda:
         grid = grid.cuda()
         flo = flo.cuda()
     vgrid = Variable(grid) + flo
 
-    # scale grid to [-1,1] 
-    vgrid[:,0,:,:] = 2.0*vgrid[:,0,:,:]/max(W-1,1)-1.0
-    vgrid[:,1,:,:] = 2.0*vgrid[:,1,:,:]/max(H-1,1)-1.0
+    # scale grid to [-1,1]
+    vgrid[:, 0, :, :] = 2.0 * vgrid[:, 0, :, :] / max(W - 1, 1) - 1.0
+    vgrid[:, 1, :, :] = 2.0 * vgrid[:, 1, :, :] / max(H - 1, 1) - 1.0
 
-    vgrid = vgrid.permute(0,2,3,1)        
+    vgrid = vgrid.permute(0, 2, 3, 1)
     output = nn.functional.grid_sample(x, vgrid)
     mask = torch.autograd.Variable(torch.ones(x.size())).cuda()
     mask = nn.functional.grid_sample(mask, vgrid)
 
     # if W==128:
-        # np.save('mask.npy', mask.cpu().data.numpy())
-        # np.save('warp.npy', output.cpu().data.numpy())
-    
-    mask[mask<0.9999] = 0
-    mask[mask>0] = 1
-    
-    return output*mask, mask
+    # np.save('mask.npy', mask.cpu().data.numpy())
+    # np.save('warp.npy', output.cpu().data.numpy())
+
+    mask[mask < 0.9999] = 0
+    mask[mask > 0] = 1
+
+    return output * mask, mask
 
 
 def get_octaves(img, num_octaves, octave_scale):
-    octaves =  [img]
+    octaves = [img]
     for _ in range(num_octaves - 1):
-        new_octave = nd.zoom(octaves[-1], (1, 1, 1 / octave_scale, 1 / octave_scale), order=1)
+        new_octave = nd.zoom(
+            octaves[-1], (1, 1, 1 / octave_scale, 1 / octave_scale), order=1
+        )
 
         if new_octave.shape[2] > 32 and new_octave.shape[3] > 32:
             octaves.append(new_octave)
 
     return octaves
-
 
 
 def deprocess(image_np):
@@ -84,6 +89,7 @@ def clip(image_tensor):
         image_tensor[0, c] = torch.clamp(image_tensor[0, c], -m / s, (1 - m) / s)
     return image_tensor
 
+
 def convert(img):
     image_np = img.squeeze().transpose(1, 2, 0)
     image_np = image_np * std.reshape((1, 1, 3)) + mean.reshape((1, 1, 3))
@@ -91,11 +97,12 @@ def convert(img):
     image_np = np.clip(image_np, 0.0, 255.0)
     return image_np.astype(np.uint8)
 
+
 def find_contours(img):
     img = convert(img)
     imgray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    ret,thresh = cv2.threshold(imgray, 127,255,0)
-    contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+    ret, thresh = cv2.threshold(imgray, 127, 255, 0)
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     # for contour in contours:
     #     hull = cv2.convexHull(contour)
@@ -114,27 +121,27 @@ def find_contours(img):
         if len(contours) == 1:
             hull.append(cv2.convexHull(contours[sorted_arr[0]]))
             # img = cv2.drawContours(mask, [hull[0]], 0, (255,255,255), 3)
-            img = cv2.fillPoly(img, pts =[hull], color=(255,255,255))
+            img = cv2.fillPoly(img, pts=[hull], color=(255, 255, 255))
         elif len(contours) == 2:
             for i in range(2):
                 hull.append(cv2.convexHull(contours[sorted_arr[i]]))
-            img = cv2.drawContours(mask, [hull[0]], 0, (255,255,255), 3)
-            img = cv2.drawContours(mask, [hull[1]], 0, (255,255,255), 3)
-            img = cv2.fillPoly(img, pts =[hull], color=(255,255,255))
+            img = cv2.drawContours(mask, [hull[0]], 0, (255, 255, 255), 3)
+            img = cv2.drawContours(mask, [hull[1]], 0, (255, 255, 255), 3)
+            img = cv2.fillPoly(img, pts=[hull], color=(255, 255, 255))
         elif len(contours) == 3:
             for i in range(3):
                 hull.append(cv2.convexHull(contours[sorted_arr[i]]))
-            img = cv2.drawContours(mask, [hull[0]], 0, (255,255,255), 3)
-            img = cv2.drawContours(mask, [hull[1]], 0, (255,255,255), 3)
-            img = cv2.drawContours(mask, [hull[2]], 0, (255,255,255), 3)
-            img = cv2.fillPoly(img, pts =[hull], color=(255,255,255))
+            img = cv2.drawContours(mask, [hull[0]], 0, (255, 255, 255), 3)
+            img = cv2.drawContours(mask, [hull[1]], 0, (255, 255, 255), 3)
+            img = cv2.drawContours(mask, [hull[2]], 0, (255, 255, 255), 3)
+            img = cv2.fillPoly(img, pts=[hull], color=(255, 255, 255))
         elif len(contours) >= 4:
             for i in range(4):
                 hull.append(cv2.convexHull(contours[sorted_arr[i]]))
-            
+
             for i in range(4):
-                img = cv2.drawContours(mask, [hull[i]], 0, (255,255,255), 3)
-                img = cv2.fillPoly(img, pts =[hull[i]], color=(255,255,255))
+                img = cv2.drawContours(mask, [hull[i]], 0, (255, 255, 255), 3)
+                img = cv2.fillPoly(img, pts=[hull[i]], color=(255, 255, 255))
                 # img = cv2.drawContours(mask, [contours[sorted_arr[1]]], 0, (255,255,255), 3)
                 # img = cv2.drawContours(mask, [contours[sorted_arr[2]]], 0, (255,255,255), 3)
                 # img = cv2.drawContours(mask, [contours[sorted_arr[3]]], 0, (255,255,255), 3)
@@ -145,7 +152,7 @@ def find_contours(img):
 
     # img = img.transpose(2, 0, 1)
     # img = np.expand_dims(img, 0)
-    return img[:,:,0]
+    return img[:, :, 0]
 
 
 def make_video(path, name):
@@ -167,13 +174,14 @@ def make_video(path, name):
             image = cv2.imread(filename)
             img_array.append(image)
 
-
         for i in range(len(img_array)):
             out.write(img_array[i])
     out.release()
 
+
 def blend(self, img1, img2, blend):
     return img1 * (1.0 - blend) + img2 * blend
+
 
 def blend_intermediate(self):
     for i in range(1, self.batchsize - 1):
@@ -192,13 +200,15 @@ def blend_intermediate(self):
     # warped_out = warp(self.prev_out[octave], flow)
     # loss = -(self.loss(out, target) + self.l1(out, warped_out))
 
+
 def smooth_grad(grad, octave):
     if octave < 5:
         smoothing = GaussianSmoothing(3, 7, 10)
-        inp = F.pad(grad, (3,3,3,3), mode="reflect")
+        inp = F.pad(grad, (3, 3, 3, 3), mode="reflect")
         return smoothing(inp)
     else:
         return grad
+
 
 class GaussianSmoothing(nn.Module):
     """
@@ -232,7 +242,7 @@ class GaussianSmoothing(nn.Module):
             kernel *= (
                 1
                 / (std * math.sqrt(2 * math.pi))
-                * torch.exp(-((mgrid - mean) / std) ** 2 / 2)
+                * torch.exp(-(((mgrid - mean) / std) ** 2) / 2)
             )
 
         # Make sure sum of values in gaussian kernel equals 1.

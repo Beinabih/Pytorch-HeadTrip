@@ -3,20 +3,17 @@ num_iterations: 11
 num_octaves: 20
 octave_scale: 1.2
 lr: 0.008
-#########
 # Random Hyperparameter
 random: False
+#########
 # Guided Dreaming on/off
 guided: False
-#########
 # takes the max class
 max_output: True
 # takes the max class on each octave
 pyramid_max: False
-#########
 # takes all the classes from the list
 channel_list: [882]
-#########
 # if you want to dream on other layers
 no_class: False
 at_layer: 0
