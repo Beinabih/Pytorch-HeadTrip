@@ -27,6 +27,7 @@ Features:
 ```
 pip install -r requirements.txt
 ```
+
 Depending on your cuda version, you might get an error installing pytorch in your env.
 
 # Usage
@@ -41,3 +42,5 @@ Currently, its only possible to dream on a sequence of frames from a video that 
 extracted beforehand with e.g. _ffmpeg_
 
 -   The SpyNet Code is adapted from this [github repository](https://github.com/sniklaus/pytorch-spynet)
+
+[**Buy me a coffee! :coffee:**](https://www.buymeacoffee.com/beinabih)
