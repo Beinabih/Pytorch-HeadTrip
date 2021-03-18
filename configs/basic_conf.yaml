@@ -31,7 +31,7 @@ invert_depth: False #foreground/background
 pretrained: True
 ########
 # input and output path
-input: "examples/example_img/city.jpeg"
+input: "examples/example_img/"
 outpath: "examples/output"
 # sequence startposition when sorted
 start_position: 0
