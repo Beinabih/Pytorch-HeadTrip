@@ -5,6 +5,7 @@ import glob
 import os
 import random
 
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -111,8 +112,10 @@ class Dreamer:
         self.model = network.to(self.device)
 
         if self.config["fp16"]:
-            amp.register_float_function(torch, "batch_norm")
-            self.model = amp.initialize(self.model, opt_level="O2")
+            scaler = torch.cuda.amp.GradScaler()
+            self.model = self.model.half()
+            # amp.register_float_function(torch, "batch_norm")
+            # self.model = amp.initialize(self.model, opt_level="O2")
 
     def forward(self, model, image, z, d_img=None, mask=None):
         """Summary
@@ -128,7 +131,12 @@ class Dreamer:
             TYPE: Description
         """
         model.zero_grad()
-        out = model(image)
+
+        if config["fp16"]:
+            with torch.cuda.amp.autocast():
+                out = model(image)
+        else:
+            out = model(image)
 
         if self.config["guided"]:
             target = self.get_target(self.config, z, out)
@@ -232,6 +240,7 @@ class Dreamer:
         """
 
         image_p = image.unsqueeze(0).cpu().detach().numpy()
+        args = []
 
         octaves = get_octaves(image_p, self.config["num_octaves"], self.octave_scale)
 
@@ -251,6 +260,7 @@ class Dreamer:
                 d_img, self.config["num_octaves"], self.octave_scale
             )
             d_img_octaves = d_img_octaves[::-1]
+            args.append(d_img_octaves)
 
         if mask is not None:
             mask = np.transpose(mask, (2, 0, 1))
@@ -259,6 +269,7 @@ class Dreamer:
                 mask, self.config["num_octaves"], self.octave_scale
             )
             octaves_mask = octaves_mask[::-1]
+            args.append(octaves_mask)
 
         kernel = np.ones((5, 5), np.uint8)
         self.detail = np.zeros_like(octaves[-1])
@@ -273,12 +284,9 @@ class Dreamer:
 
             input_image = octave_base + self.detail
 
-            if mask is not None:
-                dreamed_image = self.dream(
-                    input_image, model, d_img_octaves[octave], octaves_mask[octave]
-                )
-            else:
-                dreamed_image = self.dream(input_image, model, d_img_octaves[octave])
+            dreamed_image = self.dream(
+                input_image, model, *map(lambda x: x[octave], args)
+            )
 
             self.detail = dreamed_image - octave_base
 
@@ -430,7 +438,13 @@ def start_dreamer(config):
     pretrained = config["pretrained"]
 
     # Load image
-    img_p = config["input"] + "/*"
+    if os.path.isdir(config["input"]):
+        img_p = config["input"] + "/*"
+    elif os.path.isfile(config["input"]):
+        img_p = config["input"]
+    else:
+        raise Exception("Wrong Input")
+
     outpath = config["outpath"]
     os.makedirs(outpath, exist_ok=True)
 
@@ -449,8 +463,8 @@ if __name__ == "__main__":
 
     config = load_config()
 
-    if config["fp16"]:
-        print("Imported Amp")
-        from apex import amp
+    # if config["fp16"]:
+    #     print("Imported Amp")
+    #     from apex import amp
 
     start_dreamer(config)

@@ -28,7 +28,6 @@ Features:
 pip install -r requirements.txt
 ```
 Depending on your cuda version, you might get an error installing pytorch in your env.
-If you want to use fp16, you need to install _[apex](https://github.com/NVIDIA/apex)_ manually
 
 # Usage
 
