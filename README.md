@@ -8,6 +8,8 @@
 
 Single Deep Dreaming and Sequence Dreaming with Optical Flow and Depth Estimation in Pytorch.
 
+Check out my [article](https://towardsdatascience.com/sequence-dreaming-with-depth-estimation-in-pytorch-d754cba14d30) for the setup!
+
 Features:
 
 -   Sequence Dreaming with Optical Flow (Farneback or SpyNet)
