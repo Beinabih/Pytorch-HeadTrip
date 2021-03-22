@@ -1,5 +1,5 @@
 ######### Hyperparameters
-num_iterations: 14
+num_iterations: 10
 num_octaves: 20
 octave_scale: 1.2
 lr: 0.008
@@ -8,7 +8,7 @@ random: False
 #########
 # Guided Dreaming on/off
 guided: True
-# takes the max class
+# takes the max classd 
 max_output: False
 # takes the max class on each octave
 pyramid_max: True
@@ -16,12 +16,12 @@ pyramid_max: True
 channel_list: [863]
 # if you want to dream on other layers
 no_class: False
-at_layer: 0
+at_layer: 26
 ##########
 # optical flow spynet or opencv farneback
 use_spynet: False
 ###########
-use_depth: True
+use_depth: False
 depth_str: 1.2
 # use Threshold on mask to set specific areas to 0
 use_threshold: True

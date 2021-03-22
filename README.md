@@ -10,6 +10,8 @@ Single Deep Dreaming and Sequence Dreaming with Optical Flow and Depth Estimatio
 
 Check out my [article](https://towardsdatascience.com/sequence-dreaming-with-depth-estimation-in-pytorch-d754cba14d30) for the setup!
 
+[@aertist](https://github.com/aertist) made a colab notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1hZFeBtLTY1nUBxC0G_qvbz4ZilUh67rr?usp=sharing)
+
 Features:
 
 -   Sequence Dreaming with Optical Flow (Farneback or SpyNet)

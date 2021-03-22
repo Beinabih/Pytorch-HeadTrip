@@ -42,8 +42,8 @@ class Dreamer:
         self.img_p = img_p
         self.outpath = outpath
         self.init_model()
+        self.norm_str = 5
 
-        # self.layers = list(model.children())
         self.octave_list = [1.1, 1.2, 1.3, 1.4, 1.5]
         self.num_octaves_para = config["num_octaves"]
         self.octave_scale = config["octave_scale"]
@@ -71,7 +71,9 @@ class Dreamer:
             self.random_para()
 
         if self.no_class:
+            self.layers = list(self.model.features.children())
             self.model = nn.Sequential(*self.layers[: (self.at_layer_para + 1)])
+            self.norm_str = 1
 
         print(
             self.config["num_iterations"],
@@ -86,7 +88,6 @@ class Dreamer:
             network = models.resnext50_32x4d(pretrained=True)
         elif self.config["model"] == "vgg19":
             network = models.vgg19(pretrained=True)
-            print(network)
         elif self.config["model"] == "densenet":
             network = models.densenet121(pretrained=True)
         elif self.config["model"] == "inception":
@@ -150,7 +151,7 @@ class Dreamer:
         norm_lr = self.lr / avg_grad
         grad = image.grad.data
 
-        dream_grad = grad * (norm_lr * 5)
+        dream_grad = grad * (norm_lr * self.norm_str)
 
         if self.depth:
             d_img = torch.from_numpy(d_img)
@@ -462,9 +463,5 @@ if __name__ == "__main__":
     opt = parser.parse_args()
 
     config = load_config()
-
-    # if config["fp16"]:
-    #     print("Imported Amp")
-    #     from apex import amp
 
     start_dreamer(config)
