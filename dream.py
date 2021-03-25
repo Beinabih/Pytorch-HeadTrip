@@ -133,7 +133,7 @@ class Dreamer:
         """
         model.zero_grad()
 
-        if config["fp16"]:
+        if self.config["fp16"]:
             with torch.cuda.amp.autocast():
                 out = model(image)
         else:
