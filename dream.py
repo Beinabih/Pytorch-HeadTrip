@@ -323,7 +323,7 @@ class Dreamer:
         img2 = np.float32(img2)
 
         h, w, c = img1.shape
-        if config["use_spynet"]:
+        if self.config["use_spynet"]:
             flow = calc_opflow(np.uint8(img1), np.uint8(img2))
             flow = np.transpose(np.float32(flow), (1, 2, 0))
         else:
